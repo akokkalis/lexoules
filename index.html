@@ -243,6 +243,7 @@ button[disabled]{cursor:default}
 .note{font-size:13px;color:var(--muted);font-weight:600;margin:0}
 .sheet .blk{padding:11px 16px;font-weight:800}
 .danger{color:var(--bad)}
+.diag{margin:0;padding:10px 12px;border-radius:12px;background:var(--soft);font:600 12px/1.45 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;-webkit-user-select:text;user-select:text}
 .confirm{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:14px;background:#FFE7E4}
 .confirm div{display:flex;gap:10px;flex-wrap:wrap}
 
@@ -312,6 +313,8 @@ const MODES=[
 const STICKERS=["🦄","🐉","🦖","🐙","🦋","🐳","🦊","🐼","🐧","🦒","🌟","🍭","🎈","🚀","🏆","👑","🎸","⚽","🍩","🌻","🐞","🦜","🐬","🎁","🦩","🐨","🎠","🪁","🧁","🌋"];
 const MARK=["#FF6150","#FFC83A","#22B97F","#6E55F5","#4FB3FF","#FF8FC7","#FFC83A","#FF6150"];
 const XP_LVL=150;
+const APP_VERSION="7";
+const IS_ANDROID=/Android/i.test(navigator.userAgent||"");
 const HOWTO={
  learn:{el:["Δες την εικόνα και άκου τη λέξη.","Πάτα 🔊 για να την ακούσεις ξανά.","Πες τη λέξη δυνατά!","Πάτα «Επόμενο» για την επόμενη λέξη."],
         en:["Look at the picture and listen to the word.","Tap 🔊 to hear it again.","Say the word out loud!","Tap “Next” for the next word."]},
@@ -387,9 +390,12 @@ function ttsSay(pairs,force){
         const txt=cleanTxt(t);if(!txt)return;
         const u=new SpeechSynthesisUtterance(txt);
         u.lang=lang==="el"?"el-GR":"en-US";
-        const v=voiceFor(lang);if(v)u.voice=v;
+        /* Android: let the system TTS engine pick the voice from u.lang — forcing u.voice can make it silent */
+        if(!IS_ANDROID){const v=voiceFor(lang);if(v)u.voice=v}
         u.rate=rate||.9;u.pitch=1.05;u.volume=1;
-        u.onend=u.onerror=()=>{UTTS=UTTS.filter(x=>x!==u)};
+        u.onstart=()=>diag("▶ "+u.lang+" ok");
+        u.onend=()=>{UTTS=UTTS.filter(x=>x!==u)};
+        u.onerror=e=>{UTTS=UTTS.filter(x=>x!==u);diag("✕ "+u.lang+": "+(e&&e.error||"error"))};
         UTTS.push(u);ss.speak(u);
       });
       if(ss.paused)ss.resume();
@@ -400,6 +406,7 @@ function ttsSay(pairs,force){
   const wait=180-(Date.now()-LAST_CANCEL);
   if(wait>0)TTS_T=setTimeout(go,wait);else go();
 }
+function diag(msg){const d=document.getElementById("ttsDiag");if(d){d.hidden=false;d.textContent+=(d.textContent?"\n":"")+msg}}
 function ttsStop(){clearTimeout(TTS_T);try{if(HAS_TTS){window.speechSynthesis.cancel();LAST_CANCEL=Date.now()}}catch(e){}UTTS=[]}
 function speak(text,lang){ttsSay([[text,lang,.85]])}
 function speakSeq(lines,lang){ttsSay(lines.map(t=>[t,lang,.9]),true)}
@@ -893,13 +900,15 @@ function renderSettings(){
     <button class="blk" data-act="players">👥 Αλλαγή παίκτη · Switch player</button>
     <div class="row">${T("Ήχοι","Sounds")}<button class="tog" data-act="tog" data-k="sound" aria-pressed="${S.sound}" aria-label="Ήχοι"></button></div>
     <div class="row">${T("Φωνή","Voice")}<button class="tog" data-act="tog" data-k="voice" aria-pressed="${S.voice}" aria-label="Φωνή"></button></div>
-    ${HAS_TTS?`<button class="blk" data-act="testv">🔊 Δοκιμή φωνής: Ελληνικά + English</button>`:""}
+    ${HAS_TTS?`<button class="blk" data-act="testv">🔊 Δοκιμή φωνής: Ελληνικά + English</button>
+    <pre id="ttsDiag" class="diag" hidden></pre>`:""}
     <p class="note">${gv}</p>
     ${HAS_TTS?`<p class="note">Φωνή ΕΛ: ${esc((voiceFor("el")||{}).name||"—")} · EN: ${esc((voiceFor("en")||{}).name||"—")}<br>Αν δεν ακούγεται τίποτα: ανέβασε την ένταση πολυμέσων και κλείσε τη σίγαση.</p>`:""}
     ${CONF?`<div class="confirm"><b>${CONF==="del"?"Σίγουρα; Ο παίκτης "+esc(P.name)+" θα διαγραφεί μαζί με την πρόοδό του.":"Σίγουρα; Θα σβηστούν τα αστέρια, τα XP και τα αυτοκόλλητα του "+esc(P.name)+"."}</b>
       <div><button class="blk danger" data-act="conf2">Ναι</button><button class="blk" data-act="conf0">Όχι</button></div></div>`
       :`<button class="blk danger" data-act="reset1">Μηδενισμός προόδου</button><button class="blk danger" data-act="del1">Διαγραφή παίκτη</button>`}
     <button class="blk" data-act="close" style="background:var(--leaf);color:#fff">Έτοιμο · Done</button>
+    <p class="note" style="text-align:center">Λεξούλες · έκδοση ${APP_VERSION}</p>
   </div>`;
 }
 function closeSettings(){$("#modal").hidden=true;CONF="";if(!$("#home").hidden)renderHome();else if(P)renderTop()}
@@ -947,7 +956,10 @@ const ACT={
   settings:()=>{loadVoices();renderSettings()},
   close:()=>closeSettings(),
   tog:b=>{const k=b.dataset.k;S[k]=!S[k];save();b.setAttribute("aria-pressed",S[k]);if(k==="sound")sfx("tap")},
-  testv:()=>ttsSay([["Γεια σου! Πάμε να παίξουμε!","el"],["Hello! Let's play!","en"]],true),
+  testv:()=>{loadVoices();const d=document.getElementById("ttsDiag");
+    if(d){d.hidden=false;d.textContent=`Έκδοση ${APP_VERSION} · Android: ${IS_ANDROID?"ναι":"όχι"}\nΦωνές: ${VOICES.length} (ΕΛ: ${VOICES.filter(v=>/^el/i.test(v.lang)).length}, EN: ${VOICES.filter(v=>/^en/i.test(v.lang)).length})\nΦωνή: ${S.voice?"ανοιχτή":"κλειστή"}`}
+    ttsSay([["Γεια σου! Πάμε να παίξουμε!","el"],["Hello! Let's play!","en"]],true);
+    setTimeout(()=>{try{const ss=window.speechSynthesis;diag(`speaking=${ss.speaking} pending=${ss.pending} paused=${ss.paused}`)}catch(e){}},1500)},
   reset1:()=>{CONF="reset";renderSettings()},
   del1:()=>{CONF="del";renderSettings()},
   conf0:()=>{CONF="";renderSettings()},
@@ -970,7 +982,13 @@ else renderHome();
 
 <script>
 if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
-  addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
+  addEventListener("load",function(){
+    var hadController=!!navigator.serviceWorker.controller, reloaded=false;
+    navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(function(r){try{r.update()}catch(e){}}).catch(function(){});
+    navigator.serviceWorker.addEventListener("controllerchange",function(){
+      if(hadController&&!reloaded){reloaded=true;location.reload()}
+    });
+  });
 }
 </script>
 </body>
