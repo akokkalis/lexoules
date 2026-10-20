@@ -1,0 +1,18 @@
+# Render Blueprint — static site, no build step
+services:
+  - type: web
+    name: lexoules
+    runtime: static
+    buildCommand: echo "no build"
+    staticPublishPath: .
+    headers:
+      # always fetch the newest app shell; the service worker handles offline
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
+      - path: /
+        name: Cache-Control
+        value: no-cache

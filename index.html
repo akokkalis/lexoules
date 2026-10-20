@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#D6F0E6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Λεξούλες">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>*,*::before,*::after{box-sizing:border-box}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Λεξούλες</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Manrope:wght@500;700;800&display=swap">
+<style>
+:root{
+  /* Layout: one-screen toy box — chunky ink-bordered blocks on a dotted mint table, single column up to 760px */
+  --bg:#D6F0E6; --dot:#BCE3D4; --paper:#FFFFFF; --ink:#1D2547; --muted:#4F5A80;
+  --coral:#FF6150; --sun:#FFC83A; --grape:#6E55F5; --leaf:#1FA971; --good:#22B97F; --bad:#F2564A; --soft:#EEF0FA;
+  --display:"Comfortaa","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  --body:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background-color:var(--bg);background-image:radial-gradient(var(--dot) 2px,transparent 2.6px);background-size:22px 22px;color:var(--ink);font-family:var(--body);font-size:16px;overflow:hidden;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+#app{height:100%;display:flex;flex-direction:column;gap:12px;max-width:760px;margin:0 auto;box-sizing:border-box;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:4px 2px 18px;-webkit-overflow-scrolling:touch}
+section{display:flex;flex-direction:column;gap:16px}
+button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer;border:0;background:none;padding:0}
+button:focus-visible,input:focus-visible{outline:4px solid var(--grape);outline-offset:3px}
+small{display:block;font-size:.72em;color:var(--muted);font-weight:600;letter-spacing:.01em}
+
+.blk{background:var(--paper);border:3px solid var(--ink);border-radius:20px;box-shadow:0 5px 0 var(--ink)}
+button.blk{transition:transform .08s,box-shadow .08s}
+button.blk:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+button[disabled]{cursor:default}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:10px}
+.lvl{flex:none;width:48px;height:48px;border-radius:50%;background:var(--sun);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:20px;line-height:1}
+.lvl span{display:block;font-size:9px;font-family:var(--body);font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.xpw{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.xpl{font-size:12px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:14px;border:3px solid var(--ink);border-radius:99px;background:var(--paper);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--leaf);border-radius:99px;transition:width .5s}
+.pill{flex:none;display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:99px;font-weight:800;font-variant-numeric:tabular-nums}
+.pill b{color:#E9A400;font-size:18px}
+.icon-btn{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px}
+
+/* home */
+.hero{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding-top:4px}
+.mark{margin:0;font-family:var(--display);font-weight:700;font-size:clamp(40px,11vw,64px);line-height:1;display:flex;flex-wrap:wrap}
+.mark span{color:var(--c);transform:rotate(var(--r));display:inline-block;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink)}
+.hello{margin:6px 0 0;font-size:20px;font-weight:800}
+.hello span{display:block;font-size:14px;color:var(--muted);font-weight:600}
+.langsw{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;flex-wrap:wrap}
+.lab{font-weight:800;font-size:17px}
+.seg{display:flex;gap:6px;background:var(--soft);padding:5px;border-radius:16px;border:3px solid var(--ink)}
+.seg button{padding:9px 14px;border-radius:11px;font-weight:800;font-size:16px}
+.seg button[aria-pressed="true"]{background:var(--grape);color:#fff}
+.sec{margin:6px 0 -4px;font-family:var(--display);font-size:22px;font-weight:700}
+.sec small{font-family:var(--body);font-size:13px}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px}
+.cat{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px 12px;text-align:left;background:linear-gradient(180deg,var(--tint) 0 56%,var(--paper) 56%)}
+.cat-ico{font-size:44px;line-height:1.15;margin-bottom:8px}
+.cat-name{font-family:var(--display);font-weight:700;font-size:18px}
+.cat-en{font-size:13px;color:var(--muted);font-weight:700}
+.cat-stars{margin-top:6px;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.cat-stars b{color:#E9A400}
+.wide{display:flex;align-items:center;gap:12px;padding:14px 16px;text-align:left;font-weight:800;font-size:17px}
+.wide .em{font-size:34px}
+
+/* modes */
+.mhead{display:flex;align-items:center;gap:12px}
+.mhead .big{font-size:52px;line-height:1}
+.mhead h2{margin:0;font-family:var(--display);font-size:26px}
+.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.mode{display:flex;align-items:center;gap:14px;padding:12px 14px;text-align:left}
+.mode .mi{flex:none;width:52px;height:52px;border-radius:14px;border:3px solid var(--ink);display:grid;place-items:center;font-size:28px;background:var(--mt)}
+.mode .mt{flex:1;min-width:0;font-weight:800;font-size:17px}
+.mode .ms{flex:none;font-size:18px;letter-spacing:1px;color:#E9A400}
+.mode .ms i{color:#C9CDE0;font-style:normal}
+
+/* game */
+.ghead{display:flex;align-items:center;gap:10px}
+.ghead .bar{flex:1;height:18px}
+.ghead .bar i{background:var(--sun)}
+.chip{flex:none;padding:6px 10px;border-radius:99px;font-weight:800;font-variant-numeric:tabular-nums;font-size:15px}
+.ask{text-align:center;font-weight:800;font-size:17px}
+.ask small{font-size:13px}
+.prompt{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 12px;position:relative}
+.pemo{font-size:clamp(84px,24vw,140px);line-height:1.1}
+.pword{font-family:var(--display);font-weight:700;font-size:clamp(32px,9vw,54px);text-align:center;overflow-wrap:anywhere}
+.say{width:52px;height:52px;border-radius:50%;font-size:24px;display:grid;place-items:center;background:var(--sun)}
+.say.huge{width:120px;height:120px;font-size:56px}
+.prompt .say.corner{position:absolute;top:10px;right:10px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.opts.o3{grid-template-columns:repeat(3,1fr)}
+.opts.o3.words{grid-template-columns:1fr}
+.mgrid.g4{grid-template-columns:repeat(4,1fr)}
+.opt{min-height:64px;padding:12px;font-family:var(--display);font-weight:700;font-size:clamp(19px,5vw,26px);overflow-wrap:anywhere}
+.opt.pic{font-size:clamp(52px,15vw,84px);aspect-ratio:4/3;line-height:1;padding:6px}
+.opt.ok{background:var(--good);color:#fff}
+.opt.no{background:var(--bad);color:#fff;animation:shake .4s}
+.opt.dim{opacity:.45}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+
+/* learn */
+.lcard{display:flex;flex-direction:column;align-items:center;gap:6px;padding:22px 16px;animation:pop .35s}
+.lcard .pemo{font-size:clamp(100px,28vw,160px)}
+.lother{font-size:20px;font-weight:700;color:var(--muted)}
+.lnav{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.lnav .blk{padding:12px 18px;font-weight:800;font-size:18px}
+.lnav .go{background:var(--leaf);color:#fff}
+.count{font-weight:800;font-variant-numeric:tabular-nums;color:var(--muted)}
+
+/* memory */
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (min-width:560px){.mgrid{grid-template-columns:repeat(4,1fr)}}
+.mc{aspect-ratio:1/1;perspective:700px;max-width:100%}
+.mc-in{position:relative;width:100%;height:100%;transition:transform .35s;transform-style:preserve-3d}
+.mc.open .mc-in{transform:rotateY(180deg)}
+.mc .fc,.mc .bk{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border:3px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink);display:grid;place-items:center;padding:6px;box-sizing:border-box}
+.mc .bk{background:var(--grape);color:#fff;font-family:var(--display);font-size:34px;font-weight:700;background-image:radial-gradient(rgba(255,255,255,.18) 2px,transparent 2.5px);background-size:14px 14px}
+.mc .fc{transform:rotateY(180deg);background:var(--paper);text-align:center}
+.mc .fc.e{font-size:clamp(38px,11vw,58px)}
+.mc .fc.w{font-family:var(--display);font-weight:700;font-size:clamp(14px,3.8vw,20px);overflow-wrap:anywhere;line-height:1.15}
+.mc.done .fc{background:#D7F6E8;animation:pop .4s}
+.mc .fc.p{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center}
+.mc .fc.p .pe,.mc .fc.ww .pe{font-size:clamp(34px,10vw,52px);line-height:1}
+.mc .fc.p .cap,.mc .fc.ww .cap{font-family:var(--display);font-weight:700;font-size:clamp(12px,3.2vw,16px);line-height:1.1;overflow-wrap:anywhere}
+.mc .fc.w{background:#FFF4CF}
+.mc .fc.ww{display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;padding-top:16px}
+.mc .fc.ww .pe{font-size:clamp(22px,6vw,30px)}
+.mc .fc.ww .cap{font-size:clamp(13px,3.6vw,18px)}
+.mc .fc.ww.t{background:#FFF4CF}
+.mc .fc.ww.o{background:#E3F1FF}
+.lg{position:absolute;top:5px;left:6px;font-family:var(--body);font-size:10px;font-weight:800;letter-spacing:.06em;padding:1px 5px;border-radius:6px;background:var(--ink);color:#fff}
+.mtype{display:flex;flex-direction:column;gap:8px}
+.mtype .seg{flex-wrap:wrap}
+.mtype .seg button{flex:1 1 auto}
+
+/* spell */
+.slots{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.slot{width:40px;height:50px;border-bottom:5px solid var(--ink);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:30px}
+.slot.f{color:var(--leaf);animation:pop .25s}
+.tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.tile{width:56px;height:60px;font-family:var(--display);font-weight:700;font-size:28px;background:var(--sun)}
+.tile.used{visibility:hidden}
+.tile.no{animation:shake .4s;background:var(--bad);color:#fff}
+.hint{align-self:center;padding:10px 16px;font-weight:800}
+
+/* result */
+.res{display:flex;flex-direction:column;align-items:center;gap:10px;padding:26px 18px;text-align:center}
+.res h2{margin:0;font-family:var(--display);font-size:clamp(30px,8vw,42px)}
+.res h2 small{font-family:var(--body);font-size:16px}
+.rstars{display:flex;gap:8px;font-size:58px;line-height:1}
+.rstars span{animation:pop .45s both;color:#C9CDE0}
+.rstars span.on{color:#FFB800;-webkit-text-stroke:2px var(--ink)}
+.rline{font-weight:800;font-size:18px}
+.newst{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;font-size:48px}
+.newst span{animation:pop .5s both}
+.ract{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.ract .blk{padding:12px 18px;font-weight:800;font-size:17px}
+.ract .main{background:var(--leaf);color:#fff}
+
+/* stickers */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:12px}
+.st{aspect-ratio:1/1;display:grid;place-items:center;font-size:44px;border-radius:18px;border:3px solid var(--ink);background:var(--paper);box-shadow:0 4px 0 var(--ink)}
+.st.lock{background:var(--soft);color:#AEB4D0;font-family:var(--display);font-weight:700;font-size:30px;border-style:dashed;box-shadow:none}
+
+/* players & onboarding */
+.av{display:grid;place-items:center;border-radius:50%;background:var(--avc,var(--sun));border:3px solid var(--ink);width:84px;height:84px;font-size:48px;line-height:1;flex:none}
+.av.sm{width:44px;height:44px;font-size:26px}
+.av.xl{width:132px;height:132px;font-size:80px;box-shadow:0 6px 0 var(--ink);animation:pop .35s}
+.av.plus{background:var(--soft);font-family:var(--display);font-weight:700;color:var(--muted);border-style:dashed}
+.me{position:relative;flex:none}
+.lvb{position:absolute;right:-6px;bottom:-4px;min-width:22px;height:22px;padding:0 4px;border-radius:99px;background:var(--sun);border:2px solid var(--ink);font-size:12px;font-weight:800;display:grid;place-items:center;box-sizing:border-box}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.pcard{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 10px;text-align:center}
+.pcard b{font-family:var(--display);font-size:19px;overflow-wrap:anywhere}
+.obtop{display:flex;align-items:center;gap:12px}
+.dots{flex:1;display:flex;justify-content:center;gap:8px}
+.dots i{width:14px;height:14px;border-radius:50%;border:3px solid var(--ink);background:var(--paper)}
+.dots i.on{background:var(--grape)}
+.obq{margin:8px 0 0;font-family:var(--display);font-size:clamp(26px,7vw,36px);text-align:center;text-wrap:balance}
+.obq small{font-family:var(--body);font-size:15px}
+.obin{font:inherit;font-family:var(--display);font-weight:700;font-size:28px;text-align:center;padding:14px;width:100%;box-sizing:border-box;-webkit-user-select:text;user-select:text;color:var(--ink)}
+.obin.no{animation:shake .4s;border-color:var(--bad)}
+.obnext{align-self:center;padding:14px 28px;font-weight:800;font-size:20px;background:var(--leaf);color:#fff}
+.obnext[disabled]{opacity:.45}
+.ages{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:420px;width:100%;align-self:center}
+.age{aspect-ratio:1.3/1;font-family:var(--display);font-weight:700;font-size:34px}
+.age.sel,.avpick.sel{background:var(--grape);color:#fff}
+.avgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px}
+.avpick{aspect-ratio:1/1;font-size:38px;border-radius:18px}
+.colors{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.colors button{width:42px;height:42px;border-radius:50%;border:3px solid var(--ink);background:var(--c)}
+.colors button.sel{box-shadow:0 0 0 4px var(--paper),0 0 0 7px var(--ink)}
+.center{align-self:center}
+/* how to play */
+.howto{display:flex;flex-direction:column;gap:14px;padding:18px 16px}
+.hhead{display:flex;align-items:center;gap:12px}
+.hhead .mi{flex:none;width:58px;height:58px;border-radius:16px;border:3px solid var(--ink);display:grid;place-items:center;font-size:32px;background:var(--mt)}
+.hhead h2{margin:0;font-family:var(--display);font-size:24px}
+.htop{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.htop .lab{font-size:15px}
+.seg.sm button{padding:7px 12px;font-size:15px}
+.steps{margin:0;padding:0;list-style:none;counter-reset:st;display:flex;flex-direction:column;gap:10px}
+.steps li{counter-increment:st;display:flex;gap:12px;align-items:flex-start;font-size:18px;font-weight:700;line-height:1.4}
+.steps li::before{content:counter(st);flex:none;width:30px;height:30px;border-radius:50%;background:var(--sun);border:3px solid var(--ink);display:grid;place-items:center;font-family:var(--display);font-size:15px;line-height:1;margin-top:-1px}
+.hbtns{display:flex;flex-wrap:wrap;gap:10px}
+.hbtns .blk{flex:1 1 180px;padding:13px 16px;font-weight:800;font-size:18px}
+.hbtns .main{background:var(--leaf);color:#fff}
+.qsay{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.say.sm{width:44px;height:44px;font-size:20px}
+/* speak mode */
+.micwrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.mic{width:112px;height:112px;border-radius:50%;font-size:52px;display:grid;place-items:center;background:var(--coral)}
+.mic.on{animation:pulse 1.1s infinite}
+@keyframes pulse{0%{box-shadow:0 5px 0 var(--ink),0 0 0 0 rgba(255,97,80,.55)}100%{box-shadow:0 5px 0 var(--ink),0 0 0 26px rgba(255,97,80,0)}}
+.heard{min-height:52px;max-width:520px;text-align:center;font-size:18px;font-weight:800;line-height:1.35;overflow-wrap:anywhere}
+.heard.ok{color:var(--leaf);font-size:22px}
+.heard.no{color:var(--bad)}
+.heard.warn{color:var(--muted)}
+.skip{padding:9px 16px;font-weight:800;font-size:15px}
+/* settings */
+#modal{position:fixed;inset:0;background:rgba(29,37,71,.45);display:grid;place-items:center;padding:20px;z-index:20}
+.sheet{width:min(440px,100%);max-height:100%;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box}
+.sheet h2{margin:0;font-family:var(--display)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:800}
+.row input{font:inherit;font-weight:700;padding:10px 12px;border:3px solid var(--ink);border-radius:12px;width:100%;box-sizing:border-box;-webkit-user-select:text;user-select:text}
+.tog{width:64px;height:36px;border-radius:99px;border:3px solid var(--ink);background:var(--soft);position:relative;flex:none}
+.tog::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--ink);transition:left .15s}
+.tog[aria-pressed="true"]{background:var(--leaf)}
+.tog[aria-pressed="true"]::after{left:31px;background:#fff}
+.note{font-size:13px;color:var(--muted);font-weight:600;margin:0}
+.sheet .blk{padding:11px 16px;font-weight:800}
+.danger{color:var(--bad)}
+.confirm{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:14px;background:#FFE7E4}
+.confirm div{display:flex;gap:10px;flex-wrap:wrap}
+
+.plus{position:fixed;left:50%;top:40%;transform:translateX(-50%);font-family:var(--display);font-weight:700;font-size:40px;color:var(--leaf);-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;pointer-events:none;animation:rise .9s forwards;z-index:30}
+@keyframes rise{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-70px)}}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:25}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<div id="app">
+  <header class="top" id="top"></header>
+  <main id="main">
+    <section id="players" hidden></section>
+    <section id="onboard" hidden></section>
+    <section id="home"></section>
+    <section id="modes" hidden></section>
+    <section id="game" hidden></section>
+    <section id="result" hidden></section>
+    <section id="stickers" hidden></section>
+  </main>
+</div>
+<div id="modal" hidden></div>
+<canvas id="fx"></canvas>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const rnd=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- Words: emoji | English | Ελληνικά | άρθρο ---------- */
+const DATA={
+animals:["🐶|dog|σκύλος|ο","🐱|cat|γάτα|η","🐮|cow|αγελάδα|η","🐷|pig|γουρούνι|το","🐴|horse|άλογο|το","🐑|sheep|πρόβατο|το","🐔|hen|κότα|η","🐟|fish|ψάρι|το","🐦|bird|πουλί|το","🐘|elephant|ελέφαντας|ο","🦁|lion|λιοντάρι|το","🐻|bear|αρκούδα|η","🐸|frog|βάτραχος|ο","🐰|rabbit|κουνέλι|το","🐵|monkey|μαϊμού|η","🐢|turtle|χελώνα|η"],
+fruits:["🍎|apple|μήλο|το","🍌|banana|μπανάνα|η","🍊|orange|πορτοκάλι|το","🍇|grapes|σταφύλι|το","🍓|strawberry|φράουλα|η","🍉|watermelon|καρπούζι|το","🍋|lemon|λεμόνι|το","🍐|pear|αχλάδι|το","🍑|peach|ροδάκινο|το","🍒|cherries|κεράσια|τα","🍍|pineapple|ανανάς|ο","🥝|kiwi|ακτινίδιο|το"],
+food:["🍞|bread|ψωμί|το","🧀|cheese|τυρί|το","🥛|milk|γάλα|το","🥚|egg|αυγό|το","🍕|pizza|πίτσα|η","🍦|ice cream|παγωτό|το","🎂|cake|τούρτα|η","🥕|carrot|καρότο|το","🍅|tomato|ντομάτα|η","🥔|potato|πατάτα|η","🍯|honey|μέλι|το","🍪|cookie|μπισκότο|το"],
+colors:["🔴|red|κόκκινο|","🔵|blue|μπλε|","🟢|green|πράσινο|","🟡|yellow|κίτρινο|","🟠|orange|πορτοκαλί|","🟣|purple|μωβ|","⚫|black|μαύρο|","⚪|white|άσπρο|","🟤|brown|καφέ|"],
+numbers:["1️⃣|one|ένα|","2️⃣|two|δύο|","3️⃣|three|τρία|","4️⃣|four|τέσσερα|","5️⃣|five|πέντε|","6️⃣|six|έξι|","7️⃣|seven|επτά|","8️⃣|eight|οκτώ|","9️⃣|nine|εννέα|","🔟|ten|δέκα|"],
+body:["👁️|eye|μάτι|το","👂|ear|αυτί|το","👃|nose|μύτη|η","👄|mouth|στόμα|το","✋|hand|χέρι|το","🦶|foot|πόδι|το","🦷|tooth|δόντι|το","💪|arm|μπράτσο|το","👅|tongue|γλώσσα|η","🧠|brain|μυαλό|το"],
+clothes:["👕|T-shirt|μπλούζα|η","👖|trousers|παντελόνι|το","👗|dress|φόρεμα|το","👟|shoe|παπούτσι|το","🧢|hat|καπέλο|το","🧦|sock|κάλτσα|η","🧤|glove|γάντι|το","🧣|scarf|κασκόλ|το","🧥|coat|παλτό|το","👓|glasses|γυαλιά|τα"],
+home:["🏠|house|σπίτι|το","🚪|door|πόρτα|η","🛏️|bed|κρεβάτι|το","🪑|chair|καρέκλα|η","🛋️|sofa|καναπές|ο","💡|lamp|λάμπα|η","🔑|key|κλειδί|το","📺|television|τηλεόραση|η","⏰|clock|ρολόι|το","🛁|bath|μπανιέρα|η","🧸|teddy bear|αρκουδάκι|το","🍽️|plate|πιάτο|το"],
+school:["📕|book|βιβλίο|το","✏️|pencil|μολύβι|το","🎒|schoolbag|τσάντα|η","✂️|scissors|ψαλίδι|το","📏|ruler|χάρακας|ο","🖍️|crayon|κηρομπογιά|η","🏫|school|σχολείο|το","🖊️|pen|στυλό|το","📓|notebook|τετράδιο|το","💻|computer|υπολογιστής|ο","🌍|globe|υδρόγειος|η","🔔|bell|κουδούνι|το"],
+transport:["🚗|car|αυτοκίνητο|το","🚌|bus|λεωφορείο|το","🚲|bicycle|ποδήλατο|το","✈️|airplane|αεροπλάνο|το","🚢|ship|πλοίο|το","🚂|train|τρένο|το","🚁|helicopter|ελικόπτερο|το","🚀|rocket|πύραυλος|ο","🚕|taxi|ταξί|το","🛵|scooter|μηχανάκι|το","🚜|tractor|τρακτέρ|το","⛵|boat|βάρκα|η"],
+nature:["☀️|sun|ήλιος|ο","🌙|moon|φεγγάρι|το","⭐|star|αστέρι|το","☁️|cloud|σύννεφο|το","🌧️|rain|βροχή|η","❄️|snow|χιόνι|το","🌈|rainbow|ουράνιο τόξο|το","🌳|tree|δέντρο|το","🌸|flower|λουλούδι|το","🌊|sea|θάλασσα|η","⛰️|mountain|βουνό|το","🔥|fire|φωτιά|η"]
+};
+const CMETA=[
+ ["animals","Ζώα","Animals","🦁","#FFC48A"],["fruits","Φρούτα","Fruits","🍓","#FFA3A3"],["food","Φαγητό","Food","🍕","#FFDE85"],
+ ["colors","Χρώματα","Colours","🎨","#CDBEFF"],["numbers","Αριθμοί","Numbers","🔢","#9CD8FF"],["body","Το σώμα","The body","🙂","#FFC2DE"],
+ ["clothes","Ρούχα","Clothes","👕","#A6E8C8"],["home","Το σπίτι","Home","🏠","#FFCDB0"],["school","Σχολείο","School","🎒","#C5E88C"],
+ ["transport","Μεταφορικά","Transport","🚂","#A9D2FF"],["nature","Φύση","Nature","🌈","#93E0D3"]
+];
+const CATS=CMETA.map(([id,el,en,icon,tint])=>({id,el,en,icon,tint,words:DATA[id].map((s,i)=>{const p=s.split("|");return{id:id+i,e:p[0],en:p[1],el:p[2],art:p[3]||""}})}));
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
+const HAS_TTS=("speechSynthesis" in window)&&("SpeechSynthesisUtterance" in window);
+const MODES=[
+ {id:"learn",el:"Μαθαίνω τις λέξεις",en:"Learn the words",ico:"📖",tint:"#FFE9A8",star:false},
+ {id:"pic",el:"Βρες την εικόνα",en:"Find the picture",ico:"🖼️",tint:"#CFE9FF",star:true},
+ {id:"word",el:"Βρες τη λέξη",en:"Find the word",ico:"🔤",tint:"#FFD4CF",star:true},
+ {id:"listen",el:"Άκου και βρες",en:"Listen and find",ico:"👂",tint:"#E2DAFF",star:true,tts:true},
+ {id:"memory",el:"Ζευγάρια",en:"Memory pairs",ico:"🃏",tint:"#CFF3E2",star:true},
+ {id:"spell",el:"Γράψε τη λέξη",en:"Spell the word",ico:"✏️",tint:"#FFE0F0",star:true},
+ {id:"speak",el:"Πες τη λέξη",en:"Say the word",ico:"🎤",tint:"#FFE3B3",star:true,sr:true}
+].filter(m=>(!m.tts||HAS_TTS)&&(!m.sr||SR));
+const STICKERS=["🦄","🐉","🦖","🐙","🦋","🐳","🦊","🐼","🐧","🦒","🌟","🍭","🎈","🚀","🏆","👑","🎸","⚽","🍩","🌻","🐞","🦜","🐬","🎁","🦩","🐨","🎠","🪁","🧁","🌋"];
+const MARK=["#FF6150","#FFC83A","#22B97F","#6E55F5","#4FB3FF","#FF8FC7","#FFC83A","#FF6150"];
+const XP_LVL=150;
+const HOWTO={
+ learn:{el:["Δες την εικόνα και άκου τη λέξη.","Πάτα 🔊 για να την ακούσεις ξανά.","Πες τη λέξη δυνατά!","Πάτα «Επόμενο» για την επόμενη λέξη."],
+        en:["Look at the picture and listen to the word.","Tap 🔊 to hear it again.","Say the word out loud!","Tap “Next” for the next word."]},
+ pic:{el:["Διάβασε ή άκου τη λέξη επάνω.","Πάτα την εικόνα που ταιριάζει.","Πράσινο σημαίνει σωστό! Αν κάνεις λάθος, σου δείχνουμε τη σωστή.","3 σωστά στη σειρά δίνουν μπόνους 🔥."],
+      en:["Read or listen to the word at the top.","Tap the picture that matches.","Green means correct! If you miss, we show you the right one.","3 right in a row gives you a bonus 🔥."]},
+ word:{el:["Κοίτα την εικόνα.","Διάλεξε τη σωστή λέξη από τα κουμπιά.","Άκου τη λέξη μετά από κάθε απάντηση.","Μάζεψε αστέρια για αυτοκόλλητα!"],
+       en:["Look at the picture.","Choose the right word from the buttons.","Listen to the word after each answer.","Collect stars to win stickers!"]},
+ listen:{el:["Άκου προσεκτικά τη λέξη.","Πάτα την εικόνα που άκουσες.","Πάτα το μεγάλο 🔊 για να την ξανακούσεις.","Ανέβασε τη φωνή της συσκευής!"],
+         en:["Listen carefully to the word.","Tap the picture you heard.","Tap the big 🔊 to hear it again.","Turn up the device volume!"]},
+ memory:{el:["Όλες οι κάρτες είναι γυρισμένες ανάποδα.","Γύρνα δύο κάρτες για να βρεις το ζευγάρι.","Αν ταιριάζουν, μένουν ανοιχτές. Αν όχι, ξαναγυρίζουν.","Βρες όλα τα ζευγάρια με λίγες κινήσεις!"],
+         en:["All the cards are face down.","Turn over two cards to find a matching pair.","If they match, they stay open. If not, they turn back.","Find all the pairs in as few moves as you can!"]},
+ speak:{el:["Δες την εικόνα και άκου τη λέξη με το 🔊.","Πάτα το 🎤 και πες τη λέξη δυνατά και καθαρά.","Θα σου πω αν το είπες σωστά!","Αν δεν το πετύχεις, άκου ξανά και ξαναδοκίμασε. Έχεις 3 προσπάθειες."],
+        en:["Look at the picture and listen to the word with 🔊.","Tap 🎤 and say the word loud and clear.","I'll tell you if you said it right!","If you miss, listen again and try once more. You get 3 tries."]},
+ spell:{el:["Κοίτα την εικόνα και άκου τη λέξη.","Πάτα τα γράμματα με τη σωστή σειρά.","Το λάθος γράμμα κουνιέται. Δοκίμασε άλλο!","Κόλλησες; Πάτα 💡 Βοήθεια."],
+        en:["Look at the picture and listen to the word.","Tap the letters in the right order.","A wrong letter wiggles. Try another one!","Stuck? Tap 💡 Hint."]}
+};
+const OBQ=[{el:"Γεια! Πώς σε λένε; Γράψε το όνομά σου και πάτα Επόμενο.",en:"Hi! What's your name? Type your name and tap Next."},
+ {el:"Πόσο χρονών είσαι; Πάτα τον αριθμό.",en:"How old are you? Tap your age."},
+ {el:"Διάλεξε τον ήρωά σου και ένα χρώμα. Μετά πάτα Ας παίξουμε.",en:"Pick your hero and a colour. Then tap Let's play."}];
+
+/* ---------- Saved progress (many players per device) ---------- */
+const AVATARS=["🦊","🐼","🐯","🦁","🐸","🐵","🐰","🐻","🐨","🐧","🦄","🐱","🐶","🐙","🦖","🐝","🦉","🐬","🐞","🐢"];
+const AV_COLORS=["#FFC83A","#FF8F80","#8FD3FF","#A6E8C8","#CDBEFF","#FFC2DE"];
+const KEY="lexoules.v2";
+let S={sound:true,voice:true,players:[],cur:null};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&typeof s==="object")S=Object.assign(S,s)}catch(e){}
+try{if(!S.players.length){const o=JSON.parse(localStorage.getItem("lexoules.v1")||"null");
+  if(o&&(o.xp||o.name)){S.players.push({id:"p"+Date.now(),name:o.name||"Παίκτης",age:7,avatar:"🦊",color:AV_COLORS[0],lang:o.lang||"en",xp:o.xp||0,best:o.best||{}});S.cur=S.players[0].id}}}catch(e){}
+let P=S.players.find(p=>p.id===S.cur)||null;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const starsOf=p=>Object.values(p.best||{}).reduce((a,b)=>a+(b||0),0);
+const levelOf=p=>Math.floor((p.xp||0)/XP_LVL)+1;
+/* age sets difficulty: 4–6 easy, 7–9 normal, 10+ harder */
+const MEMT=[{id:"pp",el:"🖼️ Εικόνα + εικόνα",en:"Picture + picture"},{id:"pw",el:"🖼️ Εικόνα + λέξη",en:"Picture + word"},{id:"ww",el:"🔤 Ελληνικά + English",en:"Greek + English"}];
+const memType=()=>P&&MEMT.some(m=>m.id===P.memType)?P.memType:(P&&P.age<=6?"pp":"pw");
+const nOpts=()=>P&&P.age<=6?3:4;
+const nPairs=()=>!P?6:P.age<=6?4:P.age>=10?8:6;
+const spellMax=()=>P&&P.age<=6?5:P&&P.age<=8?7:10;
+const totalStars=()=>starsOf(P);
+const unlocked=()=>Math.min(STICKERS.length,Math.floor(totalStars()/2));
+const level=()=>levelOf(P);
+const catStars=c=>MODES.filter(m=>m.star).reduce((a,m)=>a+(P.best[c.id+":"+m.id]||0),0);
+const catMax=()=>MODES.filter(m=>m.star).length*3;
+
+const elFull=w=>w.art?w.art+" "+w.el:w.el;
+const tgt=w=>P.lang==="en"?w.en:elFull(w);
+const oth=w=>P.lang==="en"?elFull(w):w.en;
+const spellWord=w=>P.lang==="en"?w.en.toLowerCase():w.el;
+
+/* ---------- Voice ---------- */
+let VOICES=[];
+function loadVoices(){try{VOICES=window.speechSynthesis.getVoices()||[]}catch(e){}}
+if(HAS_TTS){loadVoices();try{window.speechSynthesis.onvoiceschanged=loadVoices}catch(e){}}
+function voiceFor(lang){const p=lang==="el"?"el":"en";const ok=v=>v.lang&&v.lang.toLowerCase().replace("_","-").startsWith(p);
+  return VOICES.find(v=>ok(v)&&/google|samantha|melina|natural|female/i.test(v.name))||VOICES.find(ok)}
+const hasGreekVoice=()=>VOICES.some(v=>v.lang&&v.lang.toLowerCase().startsWith("el"));
+function speak(text,lang){
+  if(!S.voice||!HAS_TTS)return;
+  try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang==="el"?"el-GR":"en-GB";
+    const v=voiceFor(lang);if(v)u.voice=v;u.rate=.85;u.pitch=1.1;window.speechSynthesis.speak(u)}catch(e){}
+}
+function speakSeq(lines,lang){
+  if(!HAS_TTS)return;
+  try{window.speechSynthesis.cancel();
+    lines.forEach(t=>{const txt=t.replace(/[\p{Extended_Pictographic}\uFE0F«»“”]/gu,"").trim();if(!txt)return;
+      const u=new SpeechSynthesisUtterance(txt);u.lang=lang==="el"?"el-GR":"en-GB";const v=voiceFor(lang);if(v)u.voice=v;u.rate=.9;u.pitch=1.05;
+      window.speechSynthesis.speak(u)})}catch(e){}
+}
+const HL=()=>S.helpLang==="en"?"en":"el";
+const helpSeg=()=>`<div class="htop"><span class="lab">${T("Οδηγίες","Instructions")}</span><div class="seg sm" role="group" aria-label="Γλώσσα οδηγιών">
+  <button data-act="hlang" data-v="el" aria-pressed="${HL()==="el"}">Ελληνικά</button><button data-act="hlang" data-v="en" aria-pressed="${HL()==="en"}">English</button></div></div>`;
+const say=w=>speak(P.lang==="el"?elFull(w):w.en,P.lang);
+
+/* ---------- Sounds (generated, work offline) ---------- */
+let AC=null;
+function sfx(type){
+  if(!S.sound)return;
+  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();
+    const seq={good:[[660,0],[990,.09]],bad:[[260,0],[200,.12]],tap:[[620,0]],flip:[[480,0]],win:[[523,0],[659,.12],[784,.24],[1047,.38]]}[type]||[];
+    const t0=AC.currentTime;
+    seq.forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain();o.type=type==="bad"?"triangle":"sine";o.frequency.value=f;
+      g.gain.setValueAtTime(.0001,t0+d);g.gain.exponentialRampToValueAtTime(type==="tap"||type==="flip"?.12:.25,t0+d+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,t0+d+.25);o.connect(g);g.connect(AC.destination);o.start(t0+d);o.stop(t0+d+.28)});
+  }catch(e){}
+}
+
+/* ---------- Confetti ---------- */
+const fx=$("#fx"),cx=fx.getContext("2d");let parts=[],raf=0;
+function sizeFx(){const d=window.devicePixelRatio||1;fx.width=innerWidth*d;fx.height=innerHeight*d;cx.setTransform(d,0,0,d,0,0)}
+addEventListener("resize",sizeFx);sizeFx();
+function confetti(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const W=innerWidth,H=innerHeight,cols=["#FF6150","#FFC83A","#22B97F","#6E55F5","#4FB3FF","#FF8FC7"];
+  for(let i=0;i<140;i++)parts.push({x:W/2+(Math.random()-.5)*W*.4,y:H*.38,vx:(Math.random()-.5)*13,vy:-Math.random()*13-4,s:Math.random()*7+5,c:cols[rnd(cols.length)],r:Math.random()*6,vr:(Math.random()-.5)*.4});
+  if(!raf)loop();
+}
+function loop(){
+  cx.clearRect(0,0,innerWidth,innerHeight);
+  parts.forEach(p=>{p.vy+=.33;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/3,p.s,p.s*.66);cx.restore()});
+  parts=parts.filter(p=>p.y<innerHeight+30);
+  raf=parts.length?requestAnimationFrame(loop):0;
+  if(!raf)cx.clearRect(0,0,innerWidth,innerHeight);
+}
+function plus(n){const d=document.createElement("div");d.className="plus";d.textContent="+"+n;document.body.appendChild(d);setTimeout(()=>d.remove(),950)}
+
+/* ---------- Screens ---------- */
+const SCREENS=["players","onboard","home","modes","game","result","stickers"];
+function show(id){SCREENS.forEach(s=>$("#"+s).hidden=s!==id);$("#main").scrollTop=0;$("#top").hidden=!P||id==="players"||id==="onboard";if(P)renderTop()}
+function renderTop(){
+  const lv=level(),pct=Math.round((P.xp%XP_LVL)/XP_LVL*100);
+  $("#top").innerHTML=`
+    <button class="me" data-act="players" aria-label="Αλλαγή παίκτη"><span class="av sm" style="--avc:${P.color}">${P.avatar}</span><span class="lvb">${lv}</span></button>
+    <div class="xpw"><span class="xpl">${P.xp%XP_LVL} / ${XP_LVL} XP</span><div class="bar"><i style="width:${pct}%"></i></div></div>
+    <span class="pill blk" title="Αστέρια"><b>★</b>${totalStars()}</span>
+    <button class="icon-btn blk" data-act="stickers" aria-label="Αυτοκόλλητα">🎁</button>
+    <button class="icon-btn blk" data-act="settings" aria-label="Ρυθμίσεις">⚙️</button>`;
+}
+const T=(el,en)=>`${el}<small>${en}</small>`;
+
+const markHtml=()=>{const rot=[-6,4,-3,5,-4,3,-5,4];return `<h1 class="mark" aria-label="Λεξούλες">${[..."Λεξούλες"].map((ch,i)=>`<span style="--c:${MARK[i]};--r:${rot[i]}deg">${ch}</span>`).join("")}</h1>`};
+function renderHome(){
+  if(!P)return renderPlayers();
+  $("#home").innerHTML=`
+  <div class="hero">
+    ${markHtml()}
+    <p class="hello">${P.name?"Γεια σου, "+esc(P.name)+"!":"Γεια σου!"}<span>Ας μάθουμε λέξεις · Let's learn words</span></p>
+  </div>
+  <div class="langsw blk">
+    <span class="lab">${T("Μαθαίνω","I'm learning")}</span>
+    <div class="seg" role="group" aria-label="Γλώσσα">
+      <button data-act="lang" data-v="en" aria-pressed="${P.lang==="en"}">English</button>
+      <button data-act="lang" data-v="el" aria-pressed="${P.lang==="el"}">Ελληνικά</button>
+    </div>
+  </div>
+  <h2 class="sec">${T("Διάλεξε θέμα","Pick a topic")}</h2>
+  <div class="cats">${CATS.map(c=>`
+    <button class="cat blk" data-act="cat" data-id="${c.id}" style="--tint:${c.tint}">
+      <span class="cat-ico">${c.icon}</span>
+      <span class="cat-name">${c.el}</span><span class="cat-en">${c.en}</span>
+      <span class="cat-stars"><b>★</b> ${catStars(c)}/${catMax()} · ${c.words.length} λέξεις</span>
+    </button>`).join("")}</div>
+  <button class="wide blk" data-act="stickers"><span class="em">🎁</span><span>${T("Τα αυτοκόλλητά μου: "+unlocked()+"/"+STICKERS.length,"My sticker book")}</span></button>`;
+  show("home");
+}
+
+let CUR=null;
+function renderModes(c){
+  CUR=c||CUR;c=CUR;
+  $("#modes").innerHTML=`
+  <div class="mhead"><button class="icon-btn blk" data-act="home" aria-label="Πίσω">←</button><span class="big">${c.icon}</span><h2>${T(c.el,c.en)}</h2></div>
+  <p class="ask">${T("Τι θες να παίξουμε;","What shall we play?")}</p>
+  <div class="modes">${MODES.map(m=>{const b=P.best[c.id+":"+m.id]||0;
+    return `<button class="mode blk" data-act="mode" data-id="${m.id}" style="--mt:${m.tint}">
+      <span class="mi">${m.ico}</span><span class="mt">${T(m.el,m.en)}</span>
+      ${m.star?`<span class="ms" aria-label="${b} αστέρια">${"★".repeat(b)}<i>${"★".repeat(3-b)}</i></span>`:""}
+    </button>`}).join("")}</div>`;
+  show("modes");
+}
+
+/* ---------- Game core ---------- */
+let G=null,TIMER=0;
+let HELP=null;
+function howtoHtml(m,inModal){
+  const lines=HOWTO[m.id][HL()];
+  return `<div class="howto blk" style="--mt:${m.tint}">
+    ${helpSeg()}
+    <div class="hhead"><span class="mi">${m.ico}</span><h2>${HL()==="el"?m.el:m.en}<small>${HL()==="el"?"Πώς παίζεται":"How to play"}</small></h2></div>
+    <ol class="steps">${lines.map(l=>`<li>${esc(l)}</li>`).join("")}</ol>
+    ${m.id==="memory"&&!inModal?`<div class="mtype"><span class="lab">${HL()==="el"?"Τι ζευγάρια θέλεις;":"Which pairs?"}</span>
+      <div class="seg sm" role="group">${MEMT.map(t=>`<button data-act="memtype" data-v="${t.id}" aria-pressed="${memType()===t.id}">${HL()==="el"?t.el:t.el.split(" ")[0]+" "+t.en}</button>`).join("")}</div></div>`:""}
+    <div class="hbtns">
+      ${HAS_TTS?`<button class="blk" data-act="sayhow">🔊 ${HL()==="el"?"Άκου τις οδηγίες":"Listen"}</button>`:""}
+      ${inModal?`<button class="blk main" data-act="hclose">${HL()==="el"?"Συνέχεια ▶":"Continue ▶"}</button>`
+               :`<button class="blk main" data-act="hstart">${HL()==="el"?"Ξεκίνα! ▶":"Start! ▶"}</button>`}
+    </div></div>`;
+}
+function startMode(id){
+  clearTimeout(TIMER);if(HAS_TTS)try{window.speechSynthesis.cancel()}catch(e){}
+  const m=MODES.find(x=>x.id===id);HELP={m,where:"intro"};
+  $("#game").innerHTML=`<div class="ghead"><button class="icon-btn blk" data-act="back" aria-label="Πίσω">←</button></div>`+howtoHtml(m,false);
+  show("game");
+}
+function openHelp(){
+  if(!G)return;HELP={m:G.m,where:"modal"};const md=$("#modal");md.hidden=false;
+  md.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="Οδηγίες" style="padding:0">${howtoHtml(G.m,true)}</div>`;
+}
+function rerenderHelp(){
+  if(!HELP)return;
+  if(HELP.where==="modal")openHelp();
+  else $("#game").innerHTML=`<div class="ghead"><button class="icon-btn blk" data-act="back" aria-label="Πίσω">←</button></div>`+howtoHtml(HELP.m,false);
+}
+function beginMode(id){
+  clearTimeout(TIMER);
+  const c=CUR,m=MODES.find(x=>x.id===id);
+  G={c,m,i:0,correct:0,streak:0,xp:0,mistakes:0,moves:0,lv0:level()};
+  if(id==="learn"){G.items=c.words.slice();G.seen=new Set();renderLearn()}
+  else if(id==="memory"){startMemory()}
+  else if(id==="spell"){const ok=w=>/^[\p{L}]+$/u.test(spellWord(w));let pool=c.words.filter(w=>ok(w)&&spellWord(w).length<=spellMax());
+    if(pool.length<4)pool=c.words.filter(w=>ok(w)&&spellWord(w).length<=10);G.items=shuffle(pool).slice(0,6);renderSpell()}
+  else if(id==="speak"){G.items=shuffle(c.words).slice(0,8);G.tries=0;G.score=0;renderSpeak()}
+  else{G.items=shuffle(c.words).slice(0,10);renderQuiz()}
+  show("game");
+}
+function head(progress,chip){
+  return `<div class="ghead"><button class="icon-btn blk" data-act="quit" aria-label="Έξοδος">✕</button>
+    <div class="bar" role="progressbar" aria-valuenow="${Math.round(progress*100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progress*100}%"></i></div>
+    <button class="icon-btn blk" data-act="help" aria-label="Οδηγίες">?</button><span class="chip blk">${chip}</span></div>`;
+}
+const streakChip=()=>G.streak>=2?"🔥 "+G.streak:"✓ "+G.correct;
+
+/* Learn (flashcards) */
+function renderLearn(){
+  const w=G.items[G.i],last=G.i===G.items.length-1;
+  if(!G.seen.has(w.id)){G.seen.add(w.id);G.xp+=2}
+  $("#game").innerHTML=head((G.i+1)/G.items.length,`${G.i+1}/${G.items.length}`)+`
+  <div class="lcard blk">
+    <div class="pemo">${w.e}</div>
+    <div class="pword">${esc(tgt(w))}</div>
+    <div class="lother">${esc(oth(w))}</div>
+    ${HAS_TTS?`<button class="say blk" data-act="sayw" aria-label="Άκου">🔊</button>`:""}
+  </div>
+  <div class="lnav">
+    <button class="blk" data-act="lprev" ${G.i===0?"disabled style='opacity:.4'":""}>← Πίσω</button>
+    <span class="count">${G.i+1} / ${G.items.length}</span>
+    <button class="blk go" data-act="lnext">${last?"Τέλος ✓":"Επόμενο →"}</button>
+  </div>`;
+  say(w);
+}
+
+/* Quiz modes: pic / word / listen */
+function distractors(w,n){
+  return shuffle(G.c.words.filter(x=>x.id!==w.id&&tgt(x)!==tgt(w)&&x.e!==w.e)).slice(0,n);
+}
+function renderQuiz(){
+  const w=G.items[G.i],mode=G.m.id;
+  const opts=shuffle([w,...distractors(w,nOpts()-1)]);
+  const o3=opts.length===3?" o3":"";
+  G.ans=w;G.lock=false;
+  let ask,prompt,optHtml;
+  if(mode==="pic"){
+    ask=T("Ποια εικόνα είναι;","Which picture is it?");
+    prompt=`<div class="prompt blk">${HAS_TTS?`<button class="say blk corner" data-act="sayw" aria-label="Άκου">🔊</button>`:""}<div class="pword">${esc(tgt(w))}</div></div>`;
+    optHtml=opts.map(o=>`<button class="opt pic blk" data-act="pick" data-id="${o.id}">${o.e}</button>`).join("");
+  }else if(mode==="word"){
+    ask=T("Ποια λέξη είναι;","Which word is it?");
+    prompt=`<div class="prompt blk"><div class="pemo">${w.e}</div></div>`;
+    optHtml=opts.map(o=>`<button class="opt blk" data-act="pick" data-id="${o.id}">${esc(tgt(o))}</button>`).join("");
+  }else{
+    ask=T("Άκου και βρες την εικόνα","Listen and find the picture");
+    prompt=`<div class="prompt blk"><button class="say huge blk" data-act="sayw" aria-label="Άκου ξανά">🔊</button><small>Πάτα για να ακούσεις ξανά · Tap to hear again</small></div>`;
+    optHtml=opts.map(o=>`<button class="opt pic blk" data-act="pick" data-id="${o.id}">${o.e}</button>`).join("");
+  }
+  $("#game").innerHTML=head(G.i/G.items.length,streakChip())+`<p class="ask">${ask}</p>${prompt}<div class="opts${o3}${mode==="word"?" words":""}">${optHtml}</div>`;
+  if(mode!=="word")say(w);
+}
+function pick(btn){
+  if(G.lock)return;G.lock=true;
+  const w=G.ans,ok=btn.dataset.id===w.id;
+  document.querySelectorAll(".opt").forEach(b=>{b.disabled=true;if(b.dataset.id===w.id)b.classList.add("ok");else if(b!==btn)b.classList.add("dim")});
+  if(ok){G.correct++;G.streak++;const g=10+(G.streak>=3?5:0);G.xp+=g;plus(g);sfx("good")}
+  else{btn.classList.add("no");G.streak=0;sfx("bad")}
+  say(w);
+  TIMER=setTimeout(()=>{G.i++;G.i>=G.items.length?finish(starsFor(G.correct/G.items.length)):renderQuiz()},ok?1100:1800);
+}
+const starsFor=r=>r>=.9?3:r>=.6?2:1;
+
+/* Memory pairs */
+function startMemory(){
+  const ws=shuffle(G.c.words).slice(0,nPairs());
+  G.items=ws;G.pairs=0;G.open=[];G.lock=false;
+  const mt=memType();G.mt=mt;
+  const ka=mt==="pp"?"p":mt==="ww"?"t":"e",kb=mt==="pp"?"p":mt==="ww"?"o":"w";
+  G.cards=shuffle([...ws.map(w=>({w,k:ka})),...ws.map(w=>({w,k:kb}))]).map((c,i)=>Object.assign(c,{n:i,done:false}));
+  renderMemory();
+}
+function renderMemory(){
+  $("#game").innerHTML=head(G.pairs/G.items.length,"🔁 "+G.moves)+`
+  <p class="ask">${G.mt==="pp"?T("Βρες τις ίδιες εικόνες","Find the matching pictures"):G.mt==="ww"?T("Ένωσε τη λέξη στα ελληνικά με τη λέξη στα αγγλικά","Match the Greek word with the English word"):T("Βρες τα ζευγάρια: εικόνα και λέξη","Match each picture with its word")}</p>
+  <div class="mgrid${G.cards.length!==12?" g4":""}">${G.cards.map(c=>`
+    <button class="mc ${c.done?"open done":""}" data-act="flip" data-n="${c.n}" aria-label="Κάρτα ${c.n+1}">
+      <div class="mc-in"><div class="bk">?</div>${cardFace(c)}</div>
+    </button>`).join("")}</div>`;
+}
+function cardFace(c){
+  const w=c.w;
+  if(c.k==="e")return `<div class="fc e">${w.e}</div>`;
+  if(c.k==="w")return `<div class="fc w">${esc(tgt(w))}</div>`;
+  if(c.k==="p")return `<div class="fc p"><span class="pe">${w.e}</span><span class="cap">${esc(tgt(w))}</span></div>`;
+  const el=c.k==="t"?P.lang==="el":P.lang!=="el";
+  return `<div class="fc ww ${c.k}"><span class="lg">${el?"ΕΛ":"EN"}</span><span class="pe">${w.e}</span><span class="cap">${esc(el?elFull(w):w.en)}</span></div>`;
+}
+function flip(btn){
+  const c=G.cards[+btn.dataset.n];
+  if(G.lock||c.done||G.open.includes(c))return;
+  btn.classList.add("open");G.open.push(c);sfx("flip");
+  if(G.open.length<2)return;
+  G.moves++;
+  const [a,b]=G.open;G.open=[];
+  const chip=document.querySelector(".ghead .chip");if(chip)chip.textContent="🔁 "+G.moves;
+  if(a.w.id===b.w.id&&a!==b){
+    a.done=b.done=true;G.pairs++;G.xp+=10;plus(10);sfx("good");say(a.w);
+    document.querySelectorAll(".mc").forEach(el=>{const cc=G.cards[+el.dataset.n];if(cc.done)el.classList.add("done")});
+    const bar=document.querySelector(".ghead .bar i");if(bar)bar.style.width=(G.pairs/G.items.length*100)+"%";
+    if(G.pairs===G.items.length)TIMER=setTimeout(()=>finish(G.moves<=G.items.length*1.5?3:G.moves<=G.items.length*2.2?2:1),900);
+  }else{
+    G.lock=true;
+    TIMER=setTimeout(()=>{document.querySelectorAll(".mc").forEach(el=>{const cc=G.cards[+el.dataset.n];if(cc===a||cc===b)el.classList.remove("open")});G.lock=false},950);
+  }
+}
+
+/* Spelling */
+function renderSpell(){
+  const w=G.items[G.i],word=spellWord(w),chars=[...word];
+  let order=shuffle(chars.map((ch,k)=>({ch,k})));
+  if(chars.length>1&&order.every((o,k)=>o.k===k))order=order.reverse();
+  G.word=chars;G.pos=0;G.lock=false;G.ans=w;
+  $("#game").innerHTML=head(G.i/G.items.length,"✏️ "+(G.i+1)+"/"+G.items.length)+`
+  <p class="ask">${T("Γράψε τη λέξη με τα γράμματα","Spell the word with the letters")}</p>
+  <div class="prompt blk">${HAS_TTS?`<button class="say blk corner" data-act="sayw" aria-label="Άκου">🔊</button>`:""}<div class="pemo">${w.e}</div><small>${esc(oth(w))}</small></div>
+  <div class="slots">${chars.map((_,k)=>`<span class="slot" data-k="${k}"></span>`).join("")}</div>
+  <div class="tiles">${order.map((o,k)=>`<button class="tile blk" data-act="tile" data-ch="${esc(o.ch)}" data-t="${k}">${esc(o.ch)}</button>`).join("")}</div>
+  <button class="hint blk" data-act="hint">💡 Βοήθεια · Hint</button>`;
+  say(w);
+}
+function tile(btn,fromHint){
+  if(G.lock||btn.classList.contains("used"))return;
+  const need=G.word[G.pos];
+  if(btn.dataset.ch===need){
+    btn.classList.add("used");
+    const s=document.querySelector(`.slot[data-k="${G.pos}"]`);s.textContent=need;s.classList.add("f");
+    G.pos++;sfx("tap");
+    if(G.pos===G.word.length){
+      G.lock=true;G.correct++;G.xp+=12;plus(12);sfx("good");say(G.ans);
+      TIMER=setTimeout(()=>{G.i++;G.i>=G.items.length?finish(G.mistakes<=2?3:G.mistakes<=6?2:1):renderSpell()},1300);
+    }
+  }else if(!fromHint){
+    G.mistakes++;sfx("bad");btn.classList.remove("no");void btn.offsetWidth;btn.classList.add("no");
+    setTimeout(()=>btn.classList.remove("no"),450);
+  }
+}
+function hint(){
+  if(G.lock)return;
+  const need=G.word[G.pos];
+  const b=[...document.querySelectorAll(".tile:not(.used)")].find(t=>t.dataset.ch===need);
+  if(b){G.mistakes++;tile(b,true)}
+}
+
+/* Speak: speech recognition */
+const SMSG={"not-allowed":["Δεν έχω άδεια για το μικρόφωνο. Επίτρεψέ το στις ρυθμίσεις του browser.","I can't use the microphone. Allow it in the browser settings."],
+ "network":["Χρειάζεται σύνδεση στο ίντερνετ για να σε ακούσω.","I need an internet connection to hear you."],
+ "no-speech":["Δεν σε άκουσα. Πάτα 🎤 και μίλα πιο δυνατά!","I didn't hear you. Tap 🎤 and speak louder!"],
+ "audio-capture":["Δεν βρέθηκε μικρόφωνο στη συσκευή.","No microphone found."],
+ "language-not-supported":["Η συσκευή δεν αναγνωρίζει αυτή τη γλώσσα.","This device can't recognise this language."],
+ "other":["Κάτι πήγε στραβά. Δοκίμασε ξανά.","Something went wrong. Try again."]};
+SMSG["service-not-allowed"]=SMSG["not-allowed"];
+const L2=(el,en)=>HL()==="el"?el:en;
+function speakMix(pairs){
+  if(!S.voice||!HAS_TTS)return;
+  try{window.speechSynthesis.cancel();pairs.forEach(([t,lang])=>{const u=new SpeechSynthesisUtterance(t);u.lang=lang==="el"?"el-GR":"en-GB";
+    const v=voiceFor(lang);if(v)u.voice=v;u.rate=.88;u.pitch=1.1;window.speechSynthesis.speak(u)})}catch(e){}
+}
+const norm=t=>String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ς/g,"σ").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim();
+const STOP=new Set(["ο","η","το","οι","τα","ενα","μια","a","an","the","it","is","its"]);
+function variants(t){
+  let toks=norm(t).split(" ").filter(Boolean);
+  if(toks.length>1)toks=toks.filter(x=>!STOP.has(x));
+  const out=new Set([toks.join("")]);
+  toks.forEach((x,i)=>{out.add(x);if(toks[i+1])out.add(x+toks[i+1])});
+  return out;
+}
+function lev(a,b){const m=a.length,n=b.length;let p=Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function matches(said,w){
+  const t=norm(P.lang==="el"?w.el:w.en).replace(/ /g,"");
+  const accept=[t];if(w.id.startsWith("numbers"))accept.push(String(+w.id.slice(7)+1));
+  const tol=t.length<=3?0:t.length<=6?1:2;
+  for(const v of variants(said))for(const a of accept){
+    if(v===a)return true;
+    if(a.length>2&&Math.abs(v.length-a.length)<=tol&&lev(v,a)<=tol)return true;
+  }
+  return false;
+}
+let REC=null;
+function stopRec(){if(REC){try{REC.onresult=REC.onerror=REC.onend=null;REC.abort()}catch(e){}REC=null}const b=$("#micBtn");if(b)b.classList.remove("on")}
+function heard(html,cls){const h=$("#heard");if(h){h.innerHTML=html;h.className="heard "+(cls||"")}}
+function renderSpeak(){
+  const w=G.items[G.i];G.ans=w;G.lock=false;
+  $("#game").innerHTML=head(G.i/G.items.length,streakChip())+`
+  <p class="ask">${T("Πάτα το μικρόφωνο και πες τη λέξη","Tap the mic and say the word")}</p>
+  <div class="prompt blk">${HAS_TTS?`<button class="say blk corner" data-act="sayw" aria-label="Άκου">🔊</button>`:""}<div class="pemo">${w.e}</div><div class="pword">${esc(tgt(w))}</div></div>
+  <div class="micwrap">
+    <button class="mic blk" id="micBtn" data-act="mic" aria-label="Μίλα">🎤</button>
+    <div class="heard" id="heard" aria-live="polite">${L2("Πάτα το 🎤 και μίλα","Tap 🎤 and talk")}</div>
+    <button class="blk skip" data-act="skipw">${L2("Επόμενη λέξη →","Next word →")}</button>
+  </div>`;
+  say(w);
+}
+function listen(){
+  if(G.lock)return;
+  if(REC){stopRec();return}
+  try{if(HAS_TTS)window.speechSynthesis.cancel()}catch(e){}
+  let r,done=false;
+  try{r=new SR()}catch(e){heard(SMSG.other[HL()==="el"?0:1],"warn");return}
+  r.lang=P.lang==="el"?"el-GR":"en-US";r.interimResults=false;r.maxAlternatives=5;r.continuous=false;
+  r.onresult=e=>{done=true;const alts=[];for(const res of e.results)for(let k=0;k<res.length;k++)alts.push(res[k].transcript);stopRec();judge(alts)};
+  r.onerror=e=>{done=true;stopRec();const m=SMSG[e.error]||SMSG.other;heard(m[HL()==="el"?0:1],"warn")};
+  r.onend=()=>{REC=null;const b=$("#micBtn");if(b)b.classList.remove("on");if(!done)heard(SMSG["no-speech"][HL()==="el"?0:1],"warn")};
+  REC=r;
+  try{r.start();$("#micBtn").classList.add("on");heard(L2("Σε ακούω... 👂","Listening... 👂"),"")}
+  catch(e){REC=null;heard(SMSG.other[HL()==="el"?0:1],"warn")}
+}
+function judge(alts){
+  const w=G.ans;if(!w)return;
+  const ok=alts.some(a=>matches(a,w));G.tries++;
+  const word=P.lang==="el"?elFull(w):w.en;
+  if(ok){
+    G.lock=true;G.score+=G.tries===1?1:G.tries===2?.7:.5;G.correct++;G.streak++;
+    const g=(G.tries===1?12:8)+(G.streak>=3?5:0);G.xp+=g;plus(g);sfx("good");
+    heard("✓ "+L2("Μπράβο! Το είπες σωστά!","Great! You said it right!"),"ok");
+    speakMix([[L2("Μπράβο! Σωστά!","Great job!"),HL()]]);
+    TIMER=setTimeout(nextSpeak,1600);
+  }else{
+    G.streak=0;sfx("bad");
+    const said=alts[0]?`${L2("Άκουσα","I heard")}: «${esc(alts[0])}». `:"";
+    if(G.tries>=3){
+      G.lock=true;heard(said+L2("Δεν πειράζει! Πάμε στην επόμενη.","That's OK! Let's try the next one."),"warn");
+      speakMix([[L2("Δεν πειράζει! Η λέξη είναι:","That's OK! The word is:"),HL()],[word,P.lang]]);
+      TIMER=setTimeout(nextSpeak,2800);
+    }else{
+      heard(said+L2("Σχεδόν! Άκου και δοκίμασε ξανά.","Almost! Listen and try again."),"no");
+      speakMix([[L2("Σχεδόν! Άκου:","Almost! Listen:"),HL()],[word,P.lang]]);
+    }
+  }
+}
+function nextSpeak(){
+  stopRec();G.i++;G.tries=0;
+  if(G.i>=G.items.length)finish(starsFor(G.score/G.items.length));else renderSpeak();
+}
+
+/* Results */
+function finish(stars){
+  clearTimeout(TIMER);
+  const before=unlocked(),key=G.c.id+":"+G.m.id;
+  if(stars&&stars>(P.best[key]||0))P.best[key]=stars;
+  P.xp+=G.xp;save();
+  const after=unlocked(),lvUp=level()>G.lv0;
+  const fresh=STICKERS.slice(before,after);
+  const title=stars==null?T("Μπράβο!","Well done!"):stars===3?T("Τέλεια!","Perfect!"):stars===2?T("Μπράβο!","Great job!"):T("Καλή προσπάθεια!","Good try!");
+  $("#result").innerHTML=`
+  <div class="res blk">
+    <h2>${title}</h2>
+    ${stars==null?`<div class="rline">Είδες ${G.items.length} λέξεις · You saw ${G.items.length} words</div>`:
+      `<div class="rstars">${[1,2,3].map(n=>`<span class="${n<=stars?"on":""}" style="animation-delay:${n*.18}s">★</span>`).join("")}</div>`}
+    ${G.m.id!=="learn"&&G.m.id!=="memory"?`<div class="rline">${G.correct} / ${G.items.length} σωστά · correct</div>`:""}
+    ${G.m.id==="memory"?`<div class="rline">${G.moves} κινήσεις · moves</div>`:""}
+    <div class="rline" style="color:var(--leaf)">+${G.xp} XP</div>
+    ${lvUp?`<div class="rline">🎉 Νέο επίπεδο ${level()}! · Level up!</div>`:""}
+    ${fresh.length?`<div class="rline">Νέο αυτοκόλλητο! · New sticker!</div><div class="newst">${fresh.map((s,i)=>`<span style="animation-delay:${.5+i*.15}s">${s}</span>`).join("")}</div>`:""}
+    <div class="ract">
+      <button class="blk main" data-act="again">↻ Ξανά · Again</button>
+      <button class="blk" data-act="back">Άλλο παιχνίδι</button>
+      <button class="blk" data-act="home">Αρχική</button>
+    </div>
+  </div>`;
+  show("result");
+  sfx("win");
+  if(stars==null||stars>=2||fresh.length)confetti();
+}
+
+function renderStickers(){
+  const u=unlocked(),need=2-(totalStars()%2);
+  $("#stickers").innerHTML=`
+  <div class="mhead"><button class="icon-btn blk" data-act="home" aria-label="Πίσω">←</button><h2>${T("Τα αυτοκόλλητά μου","My sticker book")}</h2></div>
+  <p class="ask">${u<STICKERS.length?T(`Μάζεψε ${need} ακόμα ${need===1?"αστέρι":"αστέρια"} για το επόμενο!`,"Every 2 stars unlock a new sticker"):T("Τα μάζεψες όλα!","You collected them all!")}</p>
+  <div class="sgrid">${STICKERS.map((s,i)=>i<u?`<div class="st">${s}</div>`:`<div class="st lock">?</div>`).join("")}</div>`;
+  show("stickers");
+}
+
+/* Players & onboarding */
+function renderPlayers(){
+  $("#players").innerHTML=`
+  <div class="hero">${markHtml()}<p class="hello">${T("Ποιος παίζει;","Who's playing?")}</p></div>
+  <div class="pgrid">${S.players.map(p=>`
+    <button class="pcard blk" data-act="pplay" data-id="${p.id}">
+      <span class="av" style="--avc:${p.color}">${p.avatar}</span><b>${esc(p.name)}</b>
+      <small>${p.age} ετών · Lvl ${levelOf(p)} · ★ ${starsOf(p)}</small>
+    </button>`).join("")}
+    <button class="pcard blk" data-act="padd"><span class="av plus">+</span><b>Νέος παίκτης</b><small>New player</small></button>
+  </div>`;
+  show("players");
+}
+let OB=null;
+function startOnboard(edit){
+  OB=edit?{step:0,name:edit.name,age:edit.age,avatar:edit.avatar,color:edit.color,editId:edit.id}
+         :{step:0,name:"",age:null,avatar:null,color:AV_COLORS[rnd(AV_COLORS.length)],editId:null};
+  renderOnboard();
+}
+function renderOnboard(){
+  const st=OB.step;let body="";
+  if(st===0){
+    body=`<h2 class="obq">${T(OB.editId?"Το όνομά σου":"Γεια! Πώς σε λένε;","Hi! What's your name?")}</h2>
+      <input id="obName" class="obin blk" maxlength="16" value="${esc(OB.name)}" placeholder="Γράψε το όνομά σου" autocomplete="off" autocapitalize="words" enterkeyhint="next" aria-label="Όνομα">
+      <button class="blk obnext" data-act="ob1">Επόμενο →</button>`;
+  }else if(st===1){
+    body=`<h2 class="obq">${T("Πόσο χρονών είσαι, "+esc(OB.name)+";","How old are you?")}</h2>
+      <div class="ages">${[4,5,6,7,8,9,10,11,12].map(a=>`<button class="age blk ${OB.age===a?"sel":""}" data-act="obage" data-v="${a}">${a===12?"12+":a}</button>`).join("")}</div>`;
+  }else{
+    body=`<h2 class="obq">${T("Διάλεξε τον ήρωά σου!","Pick your avatar!")}</h2>
+      <span class="av xl center" style="--avc:${OB.color}">${OB.avatar||"?"}</span>
+      <div class="colors" role="group" aria-label="Χρώμα">${AV_COLORS.map(c=>`<button class="${OB.color===c?"sel":""}" style="--c:${c}" data-act="obcol" data-v="${c}" aria-label="Χρώμα"></button>`).join("")}</div>
+      <div class="avgrid">${AVATARS.map(a=>`<button class="avpick blk ${OB.avatar===a?"sel":""}" data-act="obav" data-v="${a}">${a}</button>`).join("")}</div>
+      <button class="blk obnext" data-act="obdone" ${OB.avatar?"":"disabled"}>${OB.editId?"Αποθήκευση ✓":"Ας παίξουμε! 🎉"}</button>`;
+  }
+  body=`${helpSeg()}`+body.replace(/<\/h2>/,`</h2>${HAS_TTS?`<div class="qsay"><button class="say sm blk" data-act="sayq" aria-label="Άκου">🔊</button><small>${HL()==="el"?"Πάτα για να ακούσεις":"Tap to listen"}</small></div>`:""}`);
+  const canBack=st>0||S.players.length>0;
+  $("#onboard").innerHTML=`<div class="obtop">
+      ${canBack?`<button class="icon-btn blk" data-act="obback" aria-label="Πίσω">←</button>`:`<span style="width:46px"></span>`}
+      <div class="dots">${[0,1,2].map(n=>`<i class="${n<=st?"on":""}"></i>`).join("")}</div><span style="width:46px"></span></div>${body}`;
+  show("onboard");
+  if(st===0){const inp=$("#obName");inp.addEventListener("input",()=>{OB.name=inp.value});
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter")ACT.ob1()});
+    if(!OB.name)setTimeout(()=>{try{inp.focus()}catch(e){}},50)}
+}
+function finishOnboard(){
+  if(OB.editId){const p=S.players.find(x=>x.id===OB.editId);Object.assign(p,{name:OB.name,age:OB.age,avatar:OB.avatar,color:OB.color})}
+  else{const p={id:"p"+Date.now().toString(36)+rnd(1000),name:OB.name,age:OB.age,avatar:OB.avatar,color:OB.color,lang:"en",xp:0,best:{}};
+    S.players.push(p);S.cur=p.id}
+  P=S.players.find(x=>x.id===S.cur);save();OB=null;sfx("win");confetti();renderHome();
+}
+
+/* Settings */
+let CONF="";
+function renderSettings(){
+  const m=$("#modal");m.hidden=false;
+  const gv=HAS_TTS?(hasGreekVoice()?"Ελληνική φωνή: βρέθηκε ✓":"Δεν βρέθηκε ελληνική φωνή στη συσκευή. Πρόσθεσέ τη από τις ρυθμίσεις ομιλίας (Text-to-speech)."):"Αυτή η συσκευή δεν υποστηρίζει φωνή.";
+  m.innerHTML=`<div class="sheet blk" role="dialog" aria-modal="true" aria-label="Ρυθμίσεις">
+    <h2>${T("Ρυθμίσεις","Settings")}</h2>
+    <div class="row" style="justify-content:flex-start"><span class="av sm" style="--avc:${P.color}">${P.avatar}</span><span>${esc(P.name)}<small>${P.age} ετών</small></span></div>
+    <button class="blk" data-act="pedit">✏️ Αλλαγή ονόματος, ηλικίας, avatar</button>
+    <button class="blk" data-act="players">👥 Αλλαγή παίκτη · Switch player</button>
+    <div class="row">${T("Ήχοι","Sounds")}<button class="tog" data-act="tog" data-k="sound" aria-pressed="${S.sound}" aria-label="Ήχοι"></button></div>
+    <div class="row">${T("Φωνή","Voice")}<button class="tog" data-act="tog" data-k="voice" aria-pressed="${S.voice}" aria-label="Φωνή"></button></div>
+    ${HAS_TTS?`<button class="blk" data-act="testv">🔊 Δοκιμή φωνής · Test voice</button>`:""}
+    <p class="note">${gv}</p>
+    ${CONF?`<div class="confirm"><b>${CONF==="del"?"Σίγουρα; Ο παίκτης "+esc(P.name)+" θα διαγραφεί μαζί με την πρόοδό του.":"Σίγουρα; Θα σβηστούν τα αστέρια, τα XP και τα αυτοκόλλητα του "+esc(P.name)+"."}</b>
+      <div><button class="blk danger" data-act="conf2">Ναι</button><button class="blk" data-act="conf0">Όχι</button></div></div>`
+      :`<button class="blk danger" data-act="reset1">Μηδενισμός προόδου</button><button class="blk danger" data-act="del1">Διαγραφή παίκτη</button>`}
+    <button class="blk" data-act="close" style="background:var(--leaf);color:#fff">Έτοιμο · Done</button>
+  </div>`;
+}
+function closeSettings(){$("#modal").hidden=true;CONF="";if(!$("#home").hidden)renderHome();else if(P)renderTop()}
+
+/* ---------- Events ---------- */
+const ACT={
+  home:()=>{clearTimeout(TIMER);stopRec();renderHome()},
+  players:()=>{clearTimeout(TIMER);$("#modal").hidden=true;CONF="";renderPlayers()},
+  pplay:b=>{S.cur=b.dataset.id;P=S.players.find(p=>p.id===S.cur);save();sfx("tap");renderHome()},
+  padd:()=>{sfx("tap");startOnboard(null)},
+  pedit:()=>{$("#modal").hidden=true;CONF="";startOnboard(P)},
+  ob1:()=>{const inp=$("#obName");OB.name=(inp?inp.value:OB.name).trim();
+    if(!OB.name){sfx("bad");if(inp){inp.classList.remove("no");void inp.offsetWidth;inp.classList.add("no");inp.focus()}return}
+    sfx("tap");OB.step=1;renderOnboard()},
+  obage:b=>{OB.age=+b.dataset.v;sfx("tap");document.querySelectorAll(".age").forEach(x=>x.classList.toggle("sel",x===b));setTimeout(()=>{OB.step=2;renderOnboard()},250)},
+  obav:b=>{OB.avatar=b.dataset.v;sfx("flip");renderOnboard()},
+  obcol:b=>{OB.color=b.dataset.v;sfx("tap");renderOnboard()},
+  obdone:()=>{if(OB.avatar)finishOnboard()},
+  obback:()=>{if(OB.step>0){OB.step--;renderOnboard()}else if(OB.editId&&P)renderHome();else renderPlayers()},
+  lang:b=>{P.lang=b.dataset.v;save();sfx("tap");renderHome()},
+  cat:b=>{sfx("tap");renderModes(CATS.find(c=>c.id===b.dataset.id))},
+  mode:b=>{sfx("tap");startMode(b.dataset.id)},
+  quit:()=>{clearTimeout(TIMER);stopRec();if(G&&G.m.id==="learn"&&G.xp){P.xp+=G.xp;save()}renderModes()},
+  back:()=>{HELP=null;renderModes()},
+  again:()=>beginMode(G.m.id),
+  hstart:()=>{if(HAS_TTS)try{window.speechSynthesis.cancel()}catch(e){}sfx("tap");const id=HELP.m.id;HELP=null;beginMode(id)},
+  hclose:()=>{if(HAS_TTS)try{window.speechSynthesis.cancel()}catch(e){}$("#modal").hidden=true;HELP=null},
+  help:()=>{stopRec();sfx("tap");openHelp()},
+  mic:()=>listen(),
+  memtype:b=>{P.memType=b.dataset.v;save();sfx("tap");rerenderHelp()},
+  skipw:()=>{if(G.lock)return;stopRec();G.streak=0;nextSpeak()},
+  hlang:b=>{S.helpLang=b.dataset.v;save();sfx("tap");
+    if(!$("#onboard").hidden){renderOnboard();speakSeq([OBQ[OB.step][HL()]],HL())}
+    else{rerenderHelp();speakSeq(HOWTO[HELP.m.id][HL()],HL())}},
+  sayhow:()=>{if(HELP)speakSeq(HOWTO[HELP.m.id][HL()],HL())},
+  sayq:()=>{if(OB)speakSeq([OBQ[OB.step][HL()]],HL())},
+  sayw:()=>{const w=G.m.id==="learn"?G.items[G.i]:G.ans;if(w)say(w)},
+  pick:b=>pick(b),
+  flip:b=>flip(b),
+  tile:b=>tile(b,false),
+  hint:()=>hint(),
+  lprev:()=>{if(G.i>0){G.i--;renderLearn()}},
+  lnext:()=>{if(G.i<G.items.length-1){G.i++;sfx("tap");renderLearn()}else finish(null)},
+  stickers:()=>renderStickers(),
+  settings:()=>{loadVoices();renderSettings()},
+  close:()=>closeSettings(),
+  tog:b=>{const k=b.dataset.k;S[k]=!S[k];save();b.setAttribute("aria-pressed",S[k]);if(k==="sound")sfx("tap")},
+  testv:()=>{const was=S.voice;S.voice=true;speak(P.lang==="el"?"Γεια σου! Πάμε να παίξουμε!":"Hello! Let's play!",P.lang);S.voice=was},
+  reset1:()=>{CONF="reset";renderSettings()},
+  del1:()=>{CONF="del";renderSettings()},
+  conf0:()=>{CONF="";renderSettings()},
+  conf2:()=>{if(CONF==="del"){S.players=S.players.filter(p=>p!==P);S.cur=null;P=null;save();$("#modal").hidden=true;CONF="";
+      S.players.length?renderPlayers():startOnboard(null)}
+    else{P.xp=0;P.best={};save();CONF="";closeSettings();renderHome()}}
+};
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]");
+  if(b&&!b.disabled&&ACT[b.dataset.act]){ACT[b.dataset.act](b);return}
+  if(e.target.id==="modal"){if(HELP&&HELP.where==="modal")ACT.hclose();else closeSettings()}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#modal").hidden)closeSettings()});
+
+if(!S.players.length)startOnboard(null);
+else if(S.players.length>1||!P)renderPlayers();
+else renderHome();
+})();
+</script>
+
+<script>
+if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
+  addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
+}
+</script>
+</body>
+</html>
