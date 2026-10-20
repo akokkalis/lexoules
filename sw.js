@@ -1,5 +1,5 @@
 // Λεξούλες — offline cache. Bump VERSION when you change index.html.
-const VERSION = "lexoules-v5";
+const VERSION = "lexoules-v6";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

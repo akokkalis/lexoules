@@ -365,21 +365,44 @@ const spellWord=w=>P.lang==="en"?w.en.toLowerCase():w.el;
 let VOICES=[];
 function loadVoices(){try{VOICES=window.speechSynthesis.getVoices()||[]}catch(e){}}
 if(HAS_TTS){loadVoices();try{window.speechSynthesis.onvoiceschanged=loadVoices}catch(e){}}
-function voiceFor(lang){const p=lang==="el"?"el":"en";const ok=v=>v.lang&&v.lang.toLowerCase().replace("_","-").startsWith(p);
-  return VOICES.find(v=>ok(v)&&/google|samantha|melina|natural|female/i.test(v.name))||VOICES.find(ok)}
-const hasGreekVoice=()=>VOICES.some(v=>v.lang&&v.lang.toLowerCase().startsWith("el"));
-function speak(text,lang){
-  if(!S.voice||!HAS_TTS)return;
-  try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang==="el"?"el-GR":"en-GB";
-    const v=voiceFor(lang);if(v)u.voice=v;u.rate=.85;u.pitch=1.1;window.speechSynthesis.speak(u)}catch(e){}
+function voiceFor(lang){
+  loadVoices();const p=lang==="el"?"el":"en";
+  const ok=v=>v.lang&&v.lang.toLowerCase().replace("_","-").startsWith(p);
+  const list=VOICES.filter(ok);
+  const pref=lang==="el"?/el[-_]gr/i:/en[-_](gb|us)/i;
+  return list.find(v=>v.localService&&pref.test(v.lang))||list.find(v=>pref.test(v.lang))||list.find(v=>v.localService)||list[0]||null;
 }
-function speakSeq(lines,lang){
-  if(!HAS_TTS)return;
-  try{window.speechSynthesis.cancel();
-    lines.forEach(t=>{const txt=t.replace(/[\p{Extended_Pictographic}\uFE0F«»“”]/gu,"").trim();if(!txt)return;
-      const u=new SpeechSynthesisUtterance(txt);u.lang=lang==="el"?"el-GR":"en-GB";const v=voiceFor(lang);if(v)u.voice=v;u.rate=.9;u.pitch=1.05;
-      window.speechSynthesis.speak(u)})}catch(e){}
+const hasGreekVoice=()=>{loadVoices();return VOICES.some(v=>v.lang&&v.lang.toLowerCase().startsWith("el"))};
+/* Android Chrome: speak() right after cancel() is silently dropped, and utterances can be
+   garbage-collected mid-sentence. So: cancel only when needed, wait a beat, keep references. */
+let UTTS=[],TTS_T=0,LAST_CANCEL=0;
+const cleanTxt=t=>String(t).replace(/[\p{Extended_Pictographic}\uFE0F«»“”]/gu,"").trim();
+function ttsSay(pairs,force){
+  if(!HAS_TTS||(!S.voice&&!force))return;
+  const ss=window.speechSynthesis;
+  clearTimeout(TTS_T);
+  const go=()=>{
+    try{
+      pairs.forEach(([t,lang,rate])=>{
+        const txt=cleanTxt(t);if(!txt)return;
+        const u=new SpeechSynthesisUtterance(txt);
+        u.lang=lang==="el"?"el-GR":"en-US";
+        const v=voiceFor(lang);if(v)u.voice=v;
+        u.rate=rate||.9;u.pitch=1.05;u.volume=1;
+        u.onend=u.onerror=()=>{UTTS=UTTS.filter(x=>x!==u)};
+        UTTS.push(u);ss.speak(u);
+      });
+      if(ss.paused)ss.resume();
+    }catch(e){}
+  };
+  let busy=false;try{busy=ss.speaking||ss.pending}catch(e){}
+  if(busy){try{ss.cancel()}catch(e){}LAST_CANCEL=Date.now()}
+  const wait=180-(Date.now()-LAST_CANCEL);
+  if(wait>0)TTS_T=setTimeout(go,wait);else go();
 }
+function ttsStop(){clearTimeout(TTS_T);try{if(HAS_TTS){window.speechSynthesis.cancel();LAST_CANCEL=Date.now()}}catch(e){}UTTS=[]}
+function speak(text,lang){ttsSay([[text,lang,.85]])}
+function speakSeq(lines,lang){ttsSay(lines.map(t=>[t,lang,.9]),true)}
 const HL=()=>S.helpLang==="en"?"en":"el";
 const helpSeg=()=>`<div class="htop"><span class="lab">${T("Οδηγίες","Instructions")}</span><div class="seg sm" role="group" aria-label="Γλώσσα οδηγιών">
   <button data-act="hlang" data-v="el" aria-pressed="${HL()==="el"}">Ελληνικά</button><button data-act="hlang" data-v="en" aria-pressed="${HL()==="en"}">English</button></div></div>`;
@@ -489,7 +512,7 @@ function howtoHtml(m,inModal){
     </div></div>`;
 }
 function startMode(id){
-  clearTimeout(TIMER);if(HAS_TTS)try{window.speechSynthesis.cancel()}catch(e){}
+  clearTimeout(TIMER);ttsStop();
   const m=MODES.find(x=>x.id===id);HELP={m,where:"intro"};
   $("#game").innerHTML=`<div class="ghead"><button class="icon-btn blk" data-act="back" aria-label="Πίσω">←</button></div>`+howtoHtml(m,false);
   show("game");
@@ -668,11 +691,7 @@ const SMSG={"not-allowed":["Δεν έχω άδεια για το μικρόφω�
  "other":["Κάτι πήγε στραβά. Δοκίμασε ξανά.","Something went wrong. Try again."]};
 SMSG["service-not-allowed"]=SMSG["not-allowed"];
 const L2=(el,en)=>HL()==="el"?el:en;
-function speakMix(pairs){
-  if(!S.voice||!HAS_TTS)return;
-  try{window.speechSynthesis.cancel();pairs.forEach(([t,lang])=>{const u=new SpeechSynthesisUtterance(t);u.lang=lang==="el"?"el-GR":"en-GB";
-    const v=voiceFor(lang);if(v)u.voice=v;u.rate=.88;u.pitch=1.1;window.speechSynthesis.speak(u)})}catch(e){}
-}
+function speakMix(pairs){ttsSay(pairs.map(([t,l])=>[t,l,.88]))}
 const norm=t=>String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ς/g,"σ").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim();
 const STOP=new Set(["ο","η","το","οι","τα","ενα","μια","a","an","the","it","is","its"]);
 function variants(t){
@@ -712,16 +731,36 @@ function renderSpeak(){
 function listen(){
   if(G.lock)return;
   if(REC){stopRec();return}
-  try{if(HAS_TTS)window.speechSynthesis.cancel()}catch(e){}
-  let r,done=false;
-  try{r=new SR()}catch(e){heard(SMSG.other[HL()==="el"?0:1],"warn");return}
-  r.lang=P.lang==="el"?"el-GR":"en-US";r.interimResults=false;r.maxAlternatives=5;r.continuous=false;
-  r.onresult=e=>{done=true;const alts=[];for(const res of e.results)for(let k=0;k<res.length;k++)alts.push(res[k].transcript);stopRec();judge(alts)};
-  r.onerror=e=>{done=true;stopRec();const m=SMSG[e.error]||SMSG.other;heard(m[HL()==="el"?0:1],"warn")};
-  r.onend=()=>{REC=null;const b=$("#micBtn");if(b)b.classList.remove("on");if(!done)heard(SMSG["no-speech"][HL()==="el"?0:1],"warn")};
+  const wasTalking=(()=>{try{return HAS_TTS&&(window.speechSynthesis.speaking||window.speechSynthesis.pending)}catch(e){return false}})();
+  ttsStop();
+  const b=$("#micBtn");if(b)b.classList.add("on");
+  heard(L2("Ετοιμάσου...","Get ready..."),"warn");
+  /* give Android a moment to release the speaker before opening the mic */
+  setTimeout(startRec,wasTalking?450:120);
+}
+function startRec(){
+  if(G.lock||!$("#micBtn"))return;
+  let r;const seen=[];let judged=false;
+  try{r=new SR()}catch(e){stopRec();heard(SMSG.other[HL()==="el"?0:1],"warn");return}
+  r.lang=P.lang==="el"?"el-GR":"en-US";r.interimResults=true;r.maxAlternatives=5;r.continuous=false;
+  const fin=list=>{if(judged)return;judged=true;stopRec();judge(list.length?list:[""])};
+  r.onresult=e=>{
+    let final=false;
+    for(let i=e.resultIndex;i<e.results.length;i++){const res=e.results[i];if(res.isFinal)final=true;
+      for(let k=0;k<res.length;k++){const t=res[k].transcript;if(t&&!seen.includes(t))seen.push(t)}}
+    const last=seen[seen.length-1]||"";
+    heard(`${L2("Ακούω","Hearing")}: «${esc(last)}»`,"warn");
+    if(G.ans&&seen.some(t=>matches(t,G.ans)))return fin(seen);   /* right answer: stop at once */
+    if(final)fin(seen);
+  };
+  r.onerror=e=>{if(judged)return;
+    if(e.error==="no-speech"&&seen.length)return fin(seen);
+    judged=true;stopRec();const m=SMSG[e.error]||SMSG.other;heard(m[HL()==="el"?0:1],"warn")};
+  r.onend=()=>{if(judged)return;REC=null;const bb=$("#micBtn");if(bb)bb.classList.remove("on");
+    if(seen.length)fin(seen);else{judged=true;heard(SMSG["no-speech"][HL()==="el"?0:1],"warn")}};
   REC=r;
-  try{r.start();$("#micBtn").classList.add("on");heard(L2("Σε ακούω... 👂","Listening... 👂"),"")}
-  catch(e){REC=null;heard(SMSG.other[HL()==="el"?0:1],"warn")}
+  try{r.start();heard(L2("Σε ακούω... πες τη λέξη! 👂","Listening... say the word! 👂"),"")}
+  catch(e){REC=null;stopRec();heard(SMSG.other[HL()==="el"?0:1],"warn")}
 }
 function judge(alts){
   const w=G.ans;if(!w)return;
@@ -735,13 +774,13 @@ function judge(alts){
     TIMER=setTimeout(nextSpeak,1600);
   }else{
     G.streak=0;sfx("bad");
-    const said=alts[0]?`${L2("Άκουσα","I heard")}: «${esc(alts[0])}». `:"";
+    const said=alts.filter(Boolean).slice(-1)[0];const saidTxt=said?`${L2("Άκουσα","I heard")}: «${esc(said)}». `:"";
     if(G.tries>=3){
-      G.lock=true;heard(said+L2("Δεν πειράζει! Πάμε στην επόμενη.","That's OK! Let's try the next one."),"warn");
+      G.lock=true;heard(saidTxt+L2("Δεν πειράζει! Πάμε στην επόμενη.","That's OK! Let's try the next one."),"warn");
       speakMix([[L2("Δεν πειράζει! Η λέξη είναι:","That's OK! The word is:"),HL()],[word,P.lang]]);
       TIMER=setTimeout(nextSpeak,2800);
     }else{
-      heard(said+L2("Σχεδόν! Άκου και δοκίμασε ξανά.","Almost! Listen and try again."),"no");
+      heard(saidTxt+L2("Σχεδόν! Άκου και δοκίμασε ξανά.","Almost! Listen and try again."),"no");
       speakMix([[L2("Σχεδόν! Άκου:","Almost! Listen:"),HL()],[word,P.lang]]);
     }
   }
@@ -854,8 +893,9 @@ function renderSettings(){
     <button class="blk" data-act="players">👥 Αλλαγή παίκτη · Switch player</button>
     <div class="row">${T("Ήχοι","Sounds")}<button class="tog" data-act="tog" data-k="sound" aria-pressed="${S.sound}" aria-label="Ήχοι"></button></div>
     <div class="row">${T("Φωνή","Voice")}<button class="tog" data-act="tog" data-k="voice" aria-pressed="${S.voice}" aria-label="Φωνή"></button></div>
-    ${HAS_TTS?`<button class="blk" data-act="testv">🔊 Δοκιμή φωνής · Test voice</button>`:""}
+    ${HAS_TTS?`<button class="blk" data-act="testv">🔊 Δοκιμή φωνής: Ελληνικά + English</button>`:""}
     <p class="note">${gv}</p>
+    ${HAS_TTS?`<p class="note">Φωνή ΕΛ: ${esc((voiceFor("el")||{}).name||"—")} · EN: ${esc((voiceFor("en")||{}).name||"—")}<br>Αν δεν ακούγεται τίποτα: ανέβασε την ένταση πολυμέσων και κλείσε τη σίγαση.</p>`:""}
     ${CONF?`<div class="confirm"><b>${CONF==="del"?"Σίγουρα; Ο παίκτης "+esc(P.name)+" θα διαγραφεί μαζί με την πρόοδό του.":"Σίγουρα; Θα σβηστούν τα αστέρια, τα XP και τα αυτοκόλλητα του "+esc(P.name)+"."}</b>
       <div><button class="blk danger" data-act="conf2">Ναι</button><button class="blk" data-act="conf0">Όχι</button></div></div>`
       :`<button class="blk danger" data-act="reset1">Μηδενισμός προόδου</button><button class="blk danger" data-act="del1">Διαγραφή παίκτη</button>`}
@@ -885,8 +925,8 @@ const ACT={
   quit:()=>{clearTimeout(TIMER);stopRec();if(G&&G.m.id==="learn"&&G.xp){P.xp+=G.xp;save()}renderModes()},
   back:()=>{HELP=null;renderModes()},
   again:()=>beginMode(G.m.id),
-  hstart:()=>{if(HAS_TTS)try{window.speechSynthesis.cancel()}catch(e){}sfx("tap");const id=HELP.m.id;HELP=null;beginMode(id)},
-  hclose:()=>{if(HAS_TTS)try{window.speechSynthesis.cancel()}catch(e){}$("#modal").hidden=true;HELP=null},
+  hstart:()=>{ttsStop();sfx("tap");const id=HELP.m.id;HELP=null;beginMode(id)},
+  hclose:()=>{ttsStop();$("#modal").hidden=true;HELP=null},
   help:()=>{stopRec();sfx("tap");openHelp()},
   mic:()=>listen(),
   memtype:b=>{P.memType=b.dataset.v;save();sfx("tap");rerenderHelp()},
@@ -907,7 +947,7 @@ const ACT={
   settings:()=>{loadVoices();renderSettings()},
   close:()=>closeSettings(),
   tog:b=>{const k=b.dataset.k;S[k]=!S[k];save();b.setAttribute("aria-pressed",S[k]);if(k==="sound")sfx("tap")},
-  testv:()=>{const was=S.voice;S.voice=true;speak(P.lang==="el"?"Γεια σου! Πάμε να παίξουμε!":"Hello! Let's play!",P.lang);S.voice=was},
+  testv:()=>ttsSay([["Γεια σου! Πάμε να παίξουμε!","el"],["Hello! Let's play!","en"]],true),
   reset1:()=>{CONF="reset";renderSettings()},
   del1:()=>{CONF="del";renderSettings()},
   conf0:()=>{CONF="";renderSettings()},
